@@ -4,6 +4,7 @@ import { CreateProduct } from './dto/create-product.dto';
 import { error } from 'console';
 import { UpdateProduct } from './dto/update-product.dto';
 import { PatchProduct } from './dto/patch-product.dto';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ProductService {
@@ -24,16 +25,15 @@ export class ProductService {
   // business logic get product by id
   async getProductById(id: number) {
     const product = await this.prismaService.product.findFirst({
-      where: {
-        id: id,
-      },
+      where: {id},
+      include: {user: true}
     });
 
     if (!product || product === null) {
       throw new NotFoundException(`Product with id: ${id} is not found.`);
     }
 
-    return product;
+    return instanceToPlain(product, {excludePrefixes: ['password']})
   }
 
   // business logic create product
